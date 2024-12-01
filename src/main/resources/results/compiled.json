@@ -30,6 +30,26 @@
                 }
             ],
             "type": "function"
+        },
+        {
+            "position": 2,
+            "operations": [
+                {
+                    "action": "call_function",
+                    "values": [
+                        {
+                            "name": "function_name",
+                            "value": {
+                                "text": "hi",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "type": "event",
+            "event": "player_join"
         }
     ]
 }
