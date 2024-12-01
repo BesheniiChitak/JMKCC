@@ -9,7 +9,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 1",
+                                "text": "test 1",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -22,7 +22,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 2",
+                                "text": "test 2",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -35,7 +35,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 3",
+                                "text": "test 3",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -48,7 +48,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 4",
+                                "text": "test 4",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -61,7 +61,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 5",
+                                "text": "test 5",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -74,7 +74,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 6",
+                                "text": "test 6",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -87,7 +87,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 7",
+                                "text": "test 7",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -100,7 +100,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 8",
+                                "text": "test 8",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -113,7 +113,7 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 9",
+                                "text": "test 9",
                                 "type": "text",
                                 "parsing": "legacy"
                             }
@@ -126,9 +126,22 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet 10",
+                                "text": "test 10",
                                 "type": "text",
                                 "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "<red>wtf</red> ok",
+                                "type": "text",
+                                "parsing": "minimessage"
                             }
                         }
                     ]
