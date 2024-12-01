@@ -1,0 +1,24 @@
+{
+    "handlers": [
+        {
+            "position": 0,
+            "operations": [
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "type": "event",
+            "event": "world_start"
+        }
+    ]
+}
