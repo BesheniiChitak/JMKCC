@@ -4,151 +4,32 @@
             "position": 0,
             "operations": [
                 {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 1",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
+                    "action": "game_cancel_event",
+                    "values": []
+                }
+            ],
+            "type": "event",
+            "event": "world_start"
+        },
+        {
+            "name": "hi",
+            "position": 1,
+            "operations": [
                 {
                     "action": "player_send_message",
                     "values": [
                         {
                             "name": "messages",
                             "value": {
-                                "text": "test 2",
+                                "text": "hi",
                                 "type": "text",
                                 "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 3",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 4",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 5",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 6",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 7",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 8",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 9",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "test 10",
-                                "type": "text",
-                                "parsing": "legacy"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "action": "player_send_message",
-                    "values": [
-                        {
-                            "name": "messages",
-                            "value": {
-                                "text": "<red>wtf</red> ok",
-                                "type": "text",
-                                "parsing": "minimessage"
                             }
                         }
                     ]
                 }
             ],
-            "type": "event",
-            "event": "world_start"
+            "type": "function"
         }
     ]
 }

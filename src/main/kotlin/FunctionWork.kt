@@ -1,30 +1,26 @@
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 
-open class EventWorker {
-    fun cancel() { worldCancelEvent() }
-}
-
 @Suppress("FunctionName")
-fun Event(
-    eventType: EventType,
-    call: EventWorker.() -> Unit,
+fun Function(
+    name: String,
+    call: () -> Unit,
 ) {
     if (currentScope.scope.isNotEmpty()) {
-        errorPrint("Невозможно инициализировать событие.")
+        errorPrint("Невозможно инициализировать функцию.")
         throw Exception()
     }
-    debugPrint("Инициализация: EVENT:$eventType : $lastPosition")
+    debugPrint("Инициализация: FUN:$name : $lastPosition")
     currentScope.scope.add(lastPosition)
     data.add(
         hashMapOf(
-            "type" to JsonPrimitive("event"),
-            "event" to JsonPrimitive(eventType.name.lowercase()),
+            "type" to JsonPrimitive("function"),
+            "name" to JsonPrimitive(name),
             "position" to JsonPrimitive(lastPosition),
             "operations" to JsonArray(listOf())
         )
     )
-    call(EventWorker())
+    call()
     lastPosition++
     currentScope.scope.removeLast()
 

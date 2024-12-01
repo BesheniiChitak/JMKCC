@@ -127,23 +127,12 @@ private fun generateFunValues(argsArray: JSONArray, funName: String): String {
                     errorPrint("${'$'}{currentScope.scope}: В $funName:$argName получено \"${'$'}{$argId.value}\", ожидалось одно из: $enumValuesErrorText")
                     throw Exception()
                 }
-                funValues.add(JsonObject(hashMapOf(
-                    "name" to JsonPrimitive("$argName"),
-                    "value" to JsonObject(hashMapOf(
-                        "type" to JsonPrimitive("enum"),
-                        "enum" to $argId.jsonValue()
-                    ))
-                )))
-
+                funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to JsonObject(hashMapOf("type" to JsonPrimitive("enum"),"enum" to $argId.jsonValue())))))
             }
             """.trimIndent()
         } else {
             """
-            funValues.add(JsonObject(hashMapOf(
-                "name" to JsonPrimitive("$argName"),
-                "value" to ${argId}ARG.parse()
-            )))
-
+            funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to ${argId}ARG.parse())))
             """.trimIndent()
         }
     }
