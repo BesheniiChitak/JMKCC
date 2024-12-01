@@ -6,10 +6,9 @@ val primitives = hashMapOf("String" to "JString", "Number" to "JNumber")
 
 fun main() {
     generateEventType("src/main/resources/events.json", "src/main/kotlin/EventType.kt")
-    generateFunctions("src/main/resources/actions.json", "src/main/kotlin/functions/Functions1.kt")
+    generateFunctions("src/main/resources/actions.json", "src/main/kotlin/functions")
 }
 
-// Генерация класса enum EventType
 fun generateEventType(inputFilePath: String, outputFilePath: String) {
     val jsonContent = File(inputFilePath).readText()
     val jsonArray = JSONArray(jsonContent)
@@ -26,11 +25,10 @@ fun generateEventType(inputFilePath: String, outputFilePath: String) {
     }
 
     File(outputFilePath).writeText(enumContent)
-    println("EventType успешно создан!")
+    println("Типы событий успешно сгенерированы!")
 }
 
-// Генерация функций
-fun generateFunctions(inputFilePath: String, outputFilePath: String) {
+fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonContent = File(inputFilePath).readText()
     val jsonArray = JSONArray(jsonContent)
 
@@ -42,12 +40,16 @@ fun generateFunctions(inputFilePath: String, outputFilePath: String) {
                 appendGeneratedFunction(json)
             }
     }
+    val outputDir = File(outputDirPath)
+    if (!outputDir.exists()) {
+        outputDir.mkdirs()
+    }
 
+    val outputFilePath = "$outputDirPath/Functions1.kt"
     File(outputFilePath).writeText(functionContent)
     println("Функции успешно сгенерированы!")
 }
 
-// Генерация функции
 private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
     val functionName = toCamelCase("${json.getString("object")}_${json.getString("name")}")
     val action = json.getString("id")
@@ -65,7 +67,6 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
     appendLine("}\n")
 }
 
-// Генерация аргументов функции
 private fun generateFunctionArguments(argsArray: JSONArray): String {
     return argsArray.joinToString(", ") { arg ->
         val argObj = arg as JSONObject
@@ -76,7 +77,6 @@ private fun generateFunctionArguments(argsArray: JSONArray): String {
     }
 }
 
-// Генерация проверки и преобразования аргументов
 private fun generateArgumentHandling(argsArray: JSONArray, functionName: String): String {
     return argsArray.joinToString("\n") { arg ->
         val argObj = arg as JSONObject
@@ -110,14 +110,12 @@ private fun generateArgumentHandling(argsArray: JSONArray, functionName: String)
     }
 }
 
-
-// Генерация списка funValues
 private fun generateFunValues(argsArray: JSONArray, funName: String): String {
     return argsArray.joinToString("\n") { arg ->
         val argObj = arg as JSONObject
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
-        val argName = argObj.getString("id") // Имя аргумента из JSON
+        val argName = argObj.getString("id")
 
         if (argType == "enum") {
             val enumValues = argObj.getJSONArray("values")
@@ -126,7 +124,7 @@ private fun generateFunValues(argsArray: JSONArray, funName: String): String {
             """
             if ($argId != null) {
                 if ($argId.value !in setOf($enumValuesSeparated)) {
-                    errorPrint("${'$'}{currentScope.scope}: В функции $funName для аргумента $argName получено значение = \"${'$'}{$argId.value}\", ожидалось одно из: $enumValuesErrorText")
+                    errorPrint("${'$'}{currentScope.scope}: В $funName:$argName получено \"${'$'}{$argId.value}\", ожидалось одно из: $enumValuesErrorText")
                     throw Exception()
                 }
                 funValues.add(JsonObject(hashMapOf(
@@ -136,6 +134,7 @@ private fun generateFunValues(argsArray: JSONArray, funName: String): String {
                         "enum" to $argId.jsonValue()
                     ))
                 )))
+
             }
             """.trimIndent()
         } else {
@@ -144,13 +143,12 @@ private fun generateFunValues(argsArray: JSONArray, funName: String): String {
                 "name" to JsonPrimitive("$argName"),
                 "value" to ${argId}ARG.parse()
             )))
+
             """.trimIndent()
         }
     }
 }
 
-
-// Добавление импортов
 private fun StringBuilder.appendImports() {
     appendLine("import kotlinx.serialization.json.JsonArray")
     appendLine("import kotlinx.serialization.json.JsonObject")
@@ -158,13 +156,11 @@ private fun StringBuilder.appendImports() {
     appendLine()
 }
 
-// Преобразование строки в camelCase
 private fun toCamelCase(input: String): String {
     return input.split("_").joinToString("") { it.lowercase().replaceFirstChar { it.uppercase() } }
         .replaceFirstChar { it.lowercase() }
 }
 
-// Отображение типов JSON
 private fun mapType(type: String): String {
     return when (type) {
         "text" -> "JString"

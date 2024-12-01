@@ -9,7 +9,124 @@
                         {
                             "name": "messages",
                             "value": {
-                                "text": "i love feet",
+                                "text": "i love feet 1",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 2",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 3",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 4",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 5",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 6",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 7",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 8",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 9",
+                                "type": "text",
+                                "parsing": "legacy"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "text": "i love feet 10",
                                 "type": "text",
                                 "parsing": "legacy"
                             }

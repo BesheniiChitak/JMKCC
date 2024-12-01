@@ -9,7 +9,9 @@ import playerMessage
 fun main() {
 
     Event(EventType.WORLD_START) {
-        playerMessage("i love feet")
+        for (a in 1..10) {
+            playerMessage("test $a")
+        }
     }
 
     compile()
