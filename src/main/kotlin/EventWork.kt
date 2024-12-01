@@ -11,6 +11,10 @@ class Event(
     call: EventWorker.() -> Unit
 ) {
     init {
+        if (currentScope.scope.isNotEmpty()) {
+            errorPrint("Невозможно инициализовать событие.")
+            throw Exception()
+        }
         debugPrint("Инициализация: $eventType : $lastPosition")
         currentScope.scope.add(lastPosition)
         data.add(
