@@ -3,35 +3,18 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-//@Suppress("FunctionName")
-//fun Function(
-//    name: String,
-//    call: () -> Unit,
-//) {
-//    if (currentScope.scope.isNotEmpty()) {
-//        errorPrint("Невозможно инициализировать функцию.")
-//        throw Exception()
-//    }
-//    debugPrint("Инициализация: FUN:$name : $lastPosition")
-//    currentScope.scope.add(lastPosition)
-//    data.add(
-//        hashMapOf(
-//            "type" to JsonPrimitive("function"),
-//            "name" to JsonPrimitive(name),
-//            "position" to JsonPrimitive(lastPosition),
-//            "operations" to JsonArray(listOf())
-//        )
-//    )
-//    call()
-//    lastPosition++
-//    currentScope.scope.removeLast()
-//
-//}
-
 open class JMKCCFunctions()
 
-fun textConvert(functionName: String, argName: String, value: Any): JString {
+fun textConvert(functionName: String, argName: String, value: Any): TextValue {
     return when (value) {
+        is JGameValue -> {
+            val type = value.id.type
+            if (type != "text") {
+                errorPrint("Ошибка преобразования игрового значения $functionName:$argName - \"$type\" ($value) не может быть преобразовано в текст")
+                throw RuntimeException()
+            }
+            return value
+        }
         is String -> JString(value)
         is JString -> value
         else -> {
@@ -41,8 +24,20 @@ fun textConvert(functionName: String, argName: String, value: Any): JString {
     }
 }
 
-fun textConvertPlural(functionName: String, argName: String, value: Any): List<JString> {
+fun textConvertPlural(functionName: String, argName: String, value: Any): List<TextValue> {
     return when (value) {
+        is JGameValue -> {
+            val type = value.id.type
+            if (type != "text") {
+                if (type == "array") {
+                    warningPrint("Опасное преобразование игрового значения $functionName:$argName - List<Any> ($value) в List<JString>, может быть ошибкой")
+                    return listOf(value)
+                }
+                errorPrint("Ошибка преобразования игрового значения $functionName:$argName - \"$type\" ($value) не может быть преобразовано в текст")
+                throw RuntimeException()
+            }
+            return listOf(value)
+        }
         is String, is JString -> listOf(textConvert(functionName, argName, value))
         is List<*> -> value.map { textConvert(functionName, argName, it ?: "null") }
         else -> {
@@ -52,8 +47,16 @@ fun textConvertPlural(functionName: String, argName: String, value: Any): List<J
     }
 }
 
-fun numberConvert(functionName: String, argName: String, value: Any): JNumber {
+fun numberConvert(functionName: String, argName: String, value: Any): NumberValue {
     return when (value) {
+        is JGameValue -> {
+            val type = value.id.type
+            if (type != "number") {
+                errorPrint("Ошибка преобразования игрового значения $functionName:$argName - \"$type\" ($value) не может быть преобразовано в число")
+                throw RuntimeException()
+            }
+            return value
+        }
         is Number -> JNumber(value)
         is JNumber -> value
         else -> {
@@ -63,8 +66,20 @@ fun numberConvert(functionName: String, argName: String, value: Any): JNumber {
     }
 }
 
-fun numberConvertPlural(functionName: String, argName: String, value: Any): List<JNumber> {
+fun numberConvertPlural(functionName: String, argName: String, value: Any): List<NumberValue> {
     return when (value) {
+        is JGameValue -> {
+            val type = value.id.type
+            if (type != "number") {
+                if (type == "array") {
+                    warningPrint("Опасное преобразование игрового значения $functionName:$argName - List<Any> ($value) в List<JNumber>, может быть ошибкой")
+                    return listOf(value)
+                }
+                errorPrint("Ошибка преобразования игрового значения $functionName:$argName - \"$type\" ($value) не может быть преобразовано в число")
+                throw RuntimeException()
+            }
+            return listOf(value)
+        }
         is Number, is JNumber -> listOf(numberConvert(functionName, argName, value))
         is List<*> -> value.map { numberConvert(functionName, argName, it ?: 0) }
         else -> {
@@ -73,6 +88,7 @@ fun numberConvertPlural(functionName: String, argName: String, value: Any): List
         }
     }
 }
+
 
 fun enumCheck(functionName: String?, argName: String, enum: Any?, values: List<String>) {
     if (enum != null && enum !in values) {
@@ -97,14 +113,25 @@ inline fun <reified T : Any> typeCheck(value: Any): T {
 
 fun handleFun(name: String, body: List<Map<String, JsonElement>>) {
     if (currentScope.scope.isEmpty()) {
-        errorPrint("Действия не могут быть вызваны не функции/процесса/события")
+        errorPrint("$name: Действия не могут быть вызваны вне функции/процесса/события")
         throw RuntimeException()
     }
-    val op = JsonObject(hashMapOf(
+    val op = hashMapOf(
         "action" to JsonPrimitive(name),
         "values" to JsonArray(body.map { JsonObject(it) })
-    ))
-    currentScope.addOperationToScope(op)
+    )
+    if (currentSelector != null) {
+        if (currentSelector is PlayerSelector && !name.startsWith("player")) {
+            warningPrint("$name: Только действия над игроком могут быть вызваны с селектором игрока. Селектор проигнорирован.")
+        }
+        if (currentSelector is EntitySelector && !name.startsWith("entity")) {
+            warningPrint("$name: Только действия над сущностью могут быть вызваны с селектором сущности. Селектор проигнорирован.")
+        }
+        op["selection"] = JsonObject(hashMapOf(
+            "type" to JsonPrimitive((currentSelector as PlayerSelector).name.lowercase())
+        ))
+    }
+    currentScope.addOperationToScope(JsonObject(op))
 }
 
 fun funValue(name: String, value: JsonElement): Map<String, JsonElement> = mapOf("name" to JsonPrimitive(name), "value" to value)

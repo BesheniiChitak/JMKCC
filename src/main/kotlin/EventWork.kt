@@ -32,6 +32,6 @@ class Event(
             errorPrint("Событие ${eventType.name} не является отменяемым")
             throw RuntimeException()
         }
-        worldCancelEvent()
+        //worldCancelEvent()
     }
 }

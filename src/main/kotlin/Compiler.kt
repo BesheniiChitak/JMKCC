@@ -3,9 +3,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import java.io.File
-import java.util.concurrent.Callable
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
 import kotlin.reflect.full.*
 
 val data = mutableListOf<HashMap<String, JsonElement>>()
@@ -13,7 +10,7 @@ val data = mutableListOf<HashMap<String, JsonElement>>()
 var currentScope = Scope()
 var lastPosition = 0
 
-val vars = hashMapOf<String, Var>()
+val vars = hashMapOf<String, JVariable>()
 
 class Scope(
     val scope: MutableList<Any> = mutableListOf()
@@ -93,5 +90,5 @@ fun compile(fileName: String, functionClass: JMKCCFunctions? = null) {
     val file = File(path)
     file.createNewFile()
     file.writeText(json.encodeToString(hashMapOf("handlers" to data)))
-    println("\u001b[92m[COMPILER] Компиляция завершена и сохранена в файл по пути `$path` \u001b[0m")
+    println("\u001b[96m[ОКОНЧАНИЕ] Компиляция завершена и сохранена в файл по пути `$path` \u001b[0m")
 }

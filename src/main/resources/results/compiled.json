@@ -12,7 +12,33 @@
                                 "type": "array",
                                 "values": [
                                     {
-                                        "text": "привет!!!!",
+                                        "text": "здаров браток",
+                                        "type": "text",
+                                        "parsing": "legacy"
+                                    },
+                                    {
+                                        "text": "как дела?",
+                                        "type": "text",
+                                        "parsing": "legacy"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "selection": {
+                        "type": "all_players"
+                    },
+                    "action": "player_send_message",
+                    "values": [
+                        {
+                            "name": "messages",
+                            "value": {
+                                "type": "array",
+                                "values": [
+                                    {
+                                        "text": "JGameValue@5f205aa зашёл в мир!!!!",
                                         "type": "text",
                                         "parsing": "legacy"
                                     }

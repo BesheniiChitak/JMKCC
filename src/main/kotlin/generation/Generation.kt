@@ -9,6 +9,8 @@ const val functionNameArgument = "funName"
 
 fun main() {
     generateEventType("src/main/resources/events.json", "src/main/kotlin/generation/EventType.kt")
+    generateMaterial("src/main/resources/items.json", "src/main/kotlin/generation/Material.kt")
+    generateGameValues("src/main/resources/values.json", "src/main/kotlin/generation/GameValues.kt")
     generateFunctions("src/main/resources/actions.json", "src/main/kotlin/generation")
 }
 
@@ -17,12 +19,13 @@ fun generateEventType(inputFilePath: String, outputFilePath: String) {
     val jsonArray = JSONArray(jsonContent)
 
     val enumContent = buildString {
-        appendLine("@Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
+        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
+        appendLine("@file:Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
         appendLine("enum class EventType(val cancellable: Boolean) {")
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("id").contains("DUMMY", ignoreCase = true) }
             .forEachIndexed { index, json ->
-                append("    ${json.getString("id").uppercase()}(${json.getBoolean("cancellable")})")
+                append("\t${json.getString("id").uppercase()}(${json.getBoolean("cancellable")})")
                 if (index < jsonArray.length() - 1) append(",\n") else appendLine()
             }
         appendLine("}")
@@ -32,11 +35,51 @@ fun generateEventType(inputFilePath: String, outputFilePath: String) {
     println("Типы событий успешно сгенерированы!")
 }
 
+fun generateGameValues(inputFilePath: String, outputFilePath: String) {
+    val jsonContent = File(inputFilePath).readText()
+    val jsonArray = JSONArray(jsonContent)
+
+    val enumContent = buildString {
+        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
+        appendLine("@file:Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
+        appendLine("enum class GameValues(val type: String) {")
+        jsonArray.filterIsInstance<JSONObject>()
+            .forEachIndexed { index, json ->
+                append("\t${json.getString("id").uppercase()}(\"${json.getString("type")}\")")
+                if (index < jsonArray.length() - 1) append(",\n") else appendLine()
+            }
+        appendLine("}")
+    }
+
+    File(outputFilePath).writeText(enumContent)
+    println("Типы игровых значений успешно сгенерированы!")
+}
+
+fun generateMaterial(inputFilePath: String, outputFilePath: String) {
+    val jsonContent = File(inputFilePath).readText()
+    val jsonArray = JSONArray(jsonContent)
+
+    val enumContent = buildString {
+        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
+        appendLine("@file:Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
+        appendLine("enum class Material {")
+        jsonArray.filterIsInstance<String>().forEachIndexed { index, material ->
+                append("\t${material.uppercase()}")
+                if (index < jsonArray.length() - 1) append(",\n") else appendLine()
+            }
+        appendLine("}")
+    }
+
+    File(outputFilePath).writeText(enumContent)
+    println("Типы предметов успешно сгенерированы!")
+}
+
 fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonContent = File(inputFilePath).readText()
     val jsonArray = JSONArray(jsonContent)
 
     val functionContent = buildString {
+        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
         appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("name").contains("dummy", ignoreCase = true) }
@@ -61,13 +104,13 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
 
     appendLine("fun $functionName(${generateFunctionArguments(argsArray)}) {")
     append(generateArgumentHandling(argsArray, functionName))
-    appendLine("\thandleFun(\"$action\", ${generateFunValues(argsArray, functionName)})")
+    appendLine("handleFun(\"$action\", ${generateFunValues(argsArray, functionName)})")
     appendLine("}")
     namePlaced = false
 }
 
 private fun generateFunctionArguments(argsArray: JSONArray): String {
-    return argsArray.joinToString(", ") { arg ->
+    return argsArray.joinToString(",") { arg ->
         val argObj = arg as JSONObject
         val argType = mapType(argObj.getString("type"))
         val camelCaseId = toCamelCase(argObj.getString("id"))
@@ -81,7 +124,7 @@ var namePlaced = false
 fun StringBuilder.functionName(functionName: String): String {
     if (!namePlaced) {
         namePlaced = true
-        appendLine("\tval $functionNameArgument = \"$functionName\"")
+        appendLine("val $functionNameArgument = \"$functionName\"")
     }
     return functionNameArgument
 }
@@ -95,8 +138,8 @@ private fun StringBuilder.generateArgumentHandling(argsArray: JSONArray, functio
             val expectedType = if (argType in listOf("text", "number")) argType else null
 
             if (expectedType != null) {
-               "\tval ${argId}ARG=${expectedType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId)\n"
-            } else if (argType != "enum") "\tval ${argId}ARG=typeCheck<${mapType(argType)}>($argId)\n" else ""
+               "val ${argId}ARG=${expectedType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId)\n"
+            } else if (argType != "enum") "val ${argId}ARG=typeCheck<${mapType(argType)}>($argId)\n" else ""
         }
 }
 
@@ -109,7 +152,7 @@ private fun StringBuilder.generateFunValues(argsArray: JSONArray, functionName: 
 
         if (argType == "enum") {
             val enumValues = argObj.getJSONArray("values")
-            appendLine("\tenumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${enumValues.joinToString(",") {"\"$it\""} }))")
+            appendLine("enumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${enumValues.joinToString(",") {"\"$it\""} }))")
             ""
         } else {
             "funValue(\"$argName\",${argId}ARG.parse()),"
@@ -136,7 +179,7 @@ private fun mapType(type: String): String {
         "potion" -> "JPotion"
         "array" -> "JArray"
         "map" -> "JMap"
-        "variable" -> "Var"
+        "variable" -> "JVariable"
         "any" -> "JAny"
         else -> throw Exception("Нет обработки типа $type")
     }
