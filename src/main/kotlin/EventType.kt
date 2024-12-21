@@ -1,4 +1,4 @@
-enum class EventType(cancellable: Boolean) {
+enum class EventType(val cancellable: Boolean) {
     BELL_RING(true),
     BLOCK_BURN(true),
     BLOCK_DAMAGE(true),

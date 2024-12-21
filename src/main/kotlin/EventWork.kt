@@ -2,19 +2,25 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 
 open class EventWorker {
-    fun cancel() { worldCancelEvent() }
+}
+
+open class CancellableEventWorker : EventWorker() {
+    fun cancel() {}
 }
 
 @Suppress("FunctionName")
 fun Event(
     eventType: EventType,
-    call: EventWorker.() -> Unit,
+    call: (EventWorker) -> Unit,
 ) {
     if (currentScope.scope.isNotEmpty()) {
         errorPrint("Невозможно инициализировать событие.")
         throw Exception()
     }
     debugPrint("Инициализация: EVENT:$eventType : $lastPosition")
+
+    val worker = if (eventType.cancellable) CancellableEventWorker() else EventWorker()
+
     currentScope.scope.add(lastPosition)
     data.add(
         hashMapOf(
@@ -24,8 +30,8 @@ fun Event(
             "operations" to JsonArray(listOf())
         )
     )
-    call(EventWorker())
+
+    call(worker)
     lastPosition++
     currentScope.scope.removeLast()
-
 }

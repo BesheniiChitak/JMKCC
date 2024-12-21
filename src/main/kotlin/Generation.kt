@@ -6,7 +6,7 @@ val primitives = hashMapOf("String" to "JString", "Number" to "JNumber")
 
 fun main() {
     generateEventType("src/main/resources/events.json", "src/main/kotlin/EventType.kt")
-    generateFunctions("src/main/resources/actions.json", "src/main/kotlin/functions")
+    generateFunctions("src/main/resources/actions.json", "src/main/kotlin")
 }
 
 fun generateEventType(inputFilePath: String, outputFilePath: String) {
@@ -14,7 +14,7 @@ fun generateEventType(inputFilePath: String, outputFilePath: String) {
     val jsonArray = JSONArray(jsonContent)
 
     val enumContent = buildString {
-        appendLine("enum class EventType(cancellable: Boolean) {")
+        appendLine("enum class EventType(val cancellable: Boolean) {")
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("id").contains("DUMMY", ignoreCase = true) }
             .forEachIndexed { index, json ->
@@ -45,7 +45,7 @@ fun generateFunctions(inputFilePath: String, outputDirPath: String) {
         outputDir.mkdirs()
     }
 
-    val outputFilePath = "$outputDirPath/Functions1.kt"
+    val outputFilePath = "$outputDirPath/Functions.kt"
     File(outputFilePath).writeText(functionContent)
     println("Функции успешно сгенерированы!")
 }
@@ -72,45 +72,25 @@ private fun generateFunctionArguments(argsArray: JSONArray): String {
         val argObj = arg as JSONObject
         val argType = mapType(argObj.getString("type"))
         val camelCaseId = toCamelCase(argObj.getString("id"))
-        if (argType == "JString?") "$camelCaseId: $argType = null"
+        if (argType == "JString?") "$camelCaseId: Any? = null"
         else "$camelCaseId: Any"
     }
 }
 
 private fun generateArgumentHandling(argsArray: JSONArray, functionName: String): String {
-    return argsArray.joinToString("\n") { arg ->
+    return argsArray.joinToString("") { arg ->
         val argObj = arg as JSONObject
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
-        if (argType == "enum") {
-            ""
-        } else {
-            val expectedTypes = when (mapType(argType)) {
-                "JString", "JString?" -> listOf("String", "JString")
-                "JNumber" -> listOf("Number", "JNumber")
-                else -> listOf(mapType(argType))
-            }
+            val expectedType = if (argType in listOf("text", "number")) argType else null
 
-            if (expectedTypes.isNotEmpty()) {
-                """
-            val ${argId}ARG: ${mapType(argType)} = when ($argId) {
-                ${expectedTypes.joinToString("\n") { "is $it -> ${if (it in primitives) "${primitives[it]}($argId)" else argId}" }}
-                else -> {
-                    errorPrint("${'$'}{currentScope.scope}: В $functionName:$argId получен тип ${'$'}{$argId.javaClass.kotlin.simpleName}, ожидалось: ${
-                    expectedTypes.joinToString(
-                        ", "
-                    )
-                }")
-                    throw Exception()
-                }
-            }
-            """.trimIndent()
-            } else ""
+            if (expectedType != null) {
+               """${"\t"}val ${argId}ARG =  ${expectedType}Convert("$functionName", "$argId", $argId)${"\n"}"""
+            } else if (argType != "enum") "\tval ${argId}ARG = typeCheck<${mapType(argType)}>($argId)\n" else ""
         }
-    }
 }
 
-private fun generateFunValues(argsArray: JSONArray, funName: String): String {
+private fun generateFunValues(argsArray: JSONArray, functionName: String): String {
     return argsArray.joinToString("\n") { arg ->
         val argObj = arg as JSONObject
         val argId = toCamelCase(argObj.getString("id"))
@@ -119,21 +99,9 @@ private fun generateFunValues(argsArray: JSONArray, funName: String): String {
 
         if (argType == "enum") {
             val enumValues = argObj.getJSONArray("values")
-            val enumValuesSeparated = enumValues.joinToString(", ") { "\"$it\"" }
-            val enumValuesErrorText = enumValues.joinToString(", ") { "\\\"$it\\\"" }
-            """
-            if ($argId != null) {
-                if ($argId.value !in setOf($enumValuesSeparated)) {
-                    errorPrint("${'$'}{currentScope.scope}: В $funName:$argName получено \"${'$'}{$argId.value}\", ожидалось одно из: $enumValuesErrorText")
-                    throw Exception()
-                }
-                funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to JsonObject(hashMapOf("type" to JsonPrimitive("enum"),"enum" to $argId.jsonValue())))))
-            }
-            """.trimIndent()
+            """enumCheck("$functionName", "$argId", $argId, listOf(${enumValues.joinToString(", ") {"\"$it\""} }))${"\n"}"""
         } else {
-            """
-            funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to ${argId}ARG.parse())))
-            """.trimIndent()
+            """funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to ${argId}ARG.parse())))"""
         }
     }
 }
