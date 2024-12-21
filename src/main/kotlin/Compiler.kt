@@ -7,6 +7,8 @@ import kotlin.reflect.full.*
 
 val data = mutableListOf<HashMap<String, JsonElement>>()
 
+var varNumber = 0
+
 var currentScope = Scope()
 var lastPosition = 0
 

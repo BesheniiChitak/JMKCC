@@ -93,6 +93,13 @@ open class JMap(val value: Number): Value, JAny() {
     }
 }
 
+private fun createVar(value: Any): String {
+    val name = "jmkcc.${varNumber}"
+    varNumber++
+    variableSetValue(Var(name, VarScope.LOCAL), value)
+    return "%var_local($name)"
+}
+
 open class JGameValue(var id: GameValues, var selector: GameValueSelector = GameValueSelector.CURRENT): Value, NumberValue, TextValue, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
@@ -101,15 +108,23 @@ open class JGameValue(var id: GameValues, var selector: GameValueSelector = Game
             "selection" to JsonPrimitive("{\"type\":\"${selector.id}\"}")
         ))
     }
+
+    override fun toString(): String {
+        return createVar(this)
+    }
 }
 
 fun Value(id: GameValues, selector: GameValueSelector = GameValueSelector.CURRENT): JGameValue {
     return JGameValue(id, selector)
 }
 
-open class JVariable(name: String, scope: VarScope = VarScope.LOCAL): JAny(), NumberValue, TextValue {
+open class JVariable(val name: String, val  scope: VarScope = VarScope.LOCAL): JAny(), NumberValue, TextValue {
     override fun parse(): JsonObject {
-        TODO()
+        return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("variable"),
+            "variable" to JsonPrimitive(name),
+            "scope" to JsonPrimitive(scope.name.lowercase())
+        ))
     }
 }
 
