@@ -81,7 +81,7 @@ annotation class JMKCCFunction(
     val arguments: Array<ArgumentType> = []
 )
 
-fun compile(functionClass: JMKCCFunctions? = null) {
+fun compile(fileName: String, functionClass: JMKCCFunctions? = null) {
     if (functionClass != null) {
         val methods = (functionClass::class.companionObject ?: throw RuntimeException("Класс с функциями не имеет компаньон-объекта."))
             .memberFunctions.filter { it.hasAnnotation<JMKCCFunction>() }
@@ -89,7 +89,7 @@ fun compile(functionClass: JMKCCFunctions? = null) {
             println((method.annotations[0] as JMKCCFunction).name)
         }
     }
-    val path = "src/main/resources/results/compiled.json"
+    val path = "src/main/resources/results/$fileName.json"
     val file = File(path)
     file.createNewFile()
     file.writeText(json.encodeToString(hashMapOf("handlers" to data)))

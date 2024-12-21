@@ -1,5 +1,5 @@
-enum class Selector() {
-    ALL_PLAYERS;
+enum class EntitySelector() {
+    CURRENT, DEFAULT, KILLER, ATTACKER, SHOOTER;
 }
 enum class VarScope {
     GAME, SAVE, LOCAL

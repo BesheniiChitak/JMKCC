@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonPrimitive
 
 interface Value
 
-open class JAny(open val value: Any): Value {
+open class JAny: Value {
     open fun parse(): JsonElement {
         TODO()
     }
@@ -16,7 +16,7 @@ fun List<JAny>.parse(): JsonObject {
         "values" to JsonArray(this.map { it.parse() })
     ))
 }
-open class JString(override val value: String, val type: StringType = StringType.LEGACY): Value, JAny(value) {
+open class JString(val value: String, val type: StringType = StringType.LEGACY): Value, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("text"),
@@ -26,59 +26,72 @@ open class JString(override val value: String, val type: StringType = StringType
     }
     fun jsonValue() = JsonPrimitive(value)
 }
-open class JNumber(override val value: Number): Value, JAny(value) {
+open class JNumber(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
-        TODO()
+        return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("number"),
+            "number" to JsonPrimitive(value),
+        ))
     }
     fun jsonValue() = JsonPrimitive(value)
 }
-open class JVector(override val value: Number): Value, JAny(value) {
+open class JVector(val x: Number = 0, val y: Number = 0, val z: Number): Value, JAny() {
+    override fun parse(): JsonElement {
+        return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("number"),
+            "x" to JsonPrimitive(x),
+            "y" to JsonPrimitive(y),
+            "z" to JsonPrimitive(z),
+        ))
+    }
+}
+open class JLocation(val x: Number = 0, val y: Number = 0, val z: Number): Value, JAny() {
+    override fun parse(): JsonElement {
+        return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("number"),
+            "x" to JsonPrimitive(x),
+            "y" to JsonPrimitive(y),
+            "z" to JsonPrimitive(z),
+        ))
+    }
+}
+open class JSound(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JLocation(override val value: Number): Value, JAny(value) {
+open class JParticle(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JSound(override val value: Number): Value, JAny(value) {
+open class JBlock(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JParticle(override val value: Number): Value, JAny(value) {
+open class JItem(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JBlock(override val value: Number): Value, JAny(value) {
+open class JPotion(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JItem(override val value: Number): Value, JAny(value) {
+open class JArray(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
-open class JPotion(override val value: Number): Value, JAny(value) {
-    override fun parse(): JsonElement {
-        TODO()
-    }
-}
-open class JArray(override val value: Number): Value, JAny(value) {
-    override fun parse(): JsonElement {
-        TODO()
-    }
-}
-open class JMap(override val value: Number): Value, JAny(value) {
+open class JMap(val value: Number): Value, JAny() {
     override fun parse(): JsonElement {
         TODO()
     }
 }
 
-open class Var(name: String, scope: VarScope = VarScope.LOCAL): JAny(0) {
+open class Var(name: String, scope: VarScope = VarScope.LOCAL): JAny() {
     override fun parse(): JsonElement {
         TODO()
     }

@@ -17,6 +17,7 @@ fun generateEventType(inputFilePath: String, outputFilePath: String) {
     val jsonArray = JSONArray(jsonContent)
 
     val enumContent = buildString {
+        appendLine("@Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
         appendLine("enum class EventType(val cancellable: Boolean) {")
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("id").contains("DUMMY", ignoreCase = true) }
@@ -36,6 +37,7 @@ fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonArray = JSONArray(jsonContent)
 
     val functionContent = buildString {
+        appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("name").contains("dummy", ignoreCase = true) }
             .forEach { json ->
@@ -58,7 +60,7 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
     val argsArray = json.optJSONArray("args") ?: JSONArray()
 
     appendLine("fun $functionName(${generateFunctionArguments(argsArray)}) {")
-    appendLine(generateArgumentHandling(argsArray, functionName))
+    append(generateArgumentHandling(argsArray, functionName))
     appendLine("\thandleFun(\"$action\", ${generateFunValues(argsArray, functionName)})")
     appendLine("}")
     namePlaced = false
@@ -95,7 +97,7 @@ private fun StringBuilder.generateArgumentHandling(argsArray: JSONArray, functio
             if (expectedType != null) {
                "\tval ${argId}ARG=${expectedType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId)\n"
             } else if (argType != "enum") "\tval ${argId}ARG=typeCheck<${mapType(argType)}>($argId)\n" else ""
-        }.removeSuffix("\n")
+        }
 }
 
 private fun StringBuilder.generateFunValues(argsArray: JSONArray, functionName: String): String {
@@ -112,7 +114,7 @@ private fun StringBuilder.generateFunValues(argsArray: JSONArray, functionName: 
         } else {
             "funValue(\"$argName\",${argId}ARG.parse()),"
         }
-    }.removeSuffix(",\n") + ")"
+    }.removeSuffix("\n").removeSuffix(",") + ")"
 }
 
 private fun toCamelCase(input: String): String {

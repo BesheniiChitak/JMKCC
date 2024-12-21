@@ -6,7 +6,7 @@ import JMKCCFunction
 import JMKCCFunctions
 import compile
 import playerMessage
-//
+
 //class Fun: JMKCCFunctions() {
 //    companion object {
 //        @JMKCCFunction(
@@ -21,12 +21,12 @@ import playerMessage
 //        fun hello() {}
 //    }
 //}
-
+//
 fun main() {
 
-    Event(EventType.WORLD_START) {
-        playerMessage("123")
+    Event(EventType.PLAYER_JOIN) {
+        playerMessage("привет!!!!")
     }
 
-    compile()
+    compile("compiled")
 }
