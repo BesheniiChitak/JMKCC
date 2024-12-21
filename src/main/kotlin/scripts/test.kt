@@ -1,24 +1,32 @@
 package scripts
 
-//import Event
-//import EventType
-//import Function
-//import codeCallFunction
-//import compile
+import ArgumentType
+import Event
+import JMKCCFunction
+import JMKCCFunctions
+import compile
+import playerMessage
 //
-//import playerMessage
-//
-//fun main() {
-//
-//    for (a in 1..250) {
-//        Function("hi") {
-//            playerMessage("hi")
+//class Fun: JMKCCFunctions() {
+//    companion object {
+//        @JMKCCFunction(
+//            name = "hi",
+//            arguments = [ArgumentType.String]
+//        )
+//        fun myFun(message: Any) {
+//            playerMessage("123", "321")
 //        }
 //
-//        Event(EventType.PLAYER_JOIN) {
-//            codeCallFunction("hi")
-//        }
+//        @JMKCCFunction("hello")
+//        fun hello() {}
 //    }
-//
-//    compile()
 //}
+
+fun main() {
+
+    Event(EventType.WORLD_START) {
+        playerMessage(listOf("123", "321"))
+    }
+
+    compile()
+}

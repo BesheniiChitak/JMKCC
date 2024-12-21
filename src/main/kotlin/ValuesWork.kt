@@ -1,3 +1,4 @@
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -8,6 +9,12 @@ open class JAny(open val value: Any): Value {
     open fun parse(): JsonElement {
         TODO()
     }
+}
+fun List<JAny>.parse(): JsonObject {
+    return JsonObject(hashMapOf(
+        "type" to JsonPrimitive("array"),
+        "values" to JsonArray(this.map { it.parse() })
+    ))
 }
 open class JString(override val value: String, val type: StringType = StringType.LEGACY): Value, JAny(value) {
     override fun parse(): JsonObject {

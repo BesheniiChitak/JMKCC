@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.0"
 }
 
-group = "jmkc"
+group = "JMKCC"
 version = "1.0"
 
 repositories {
@@ -10,8 +10,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0-RC")
     implementation("org.json:json:20231013")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.0")
 }
 
 kotlin {

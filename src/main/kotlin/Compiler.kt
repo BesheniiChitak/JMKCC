@@ -1,9 +1,12 @@
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import java.io.File
+import java.util.concurrent.Callable
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.full.*
 
 val data = mutableListOf<HashMap<String, JsonElement>>()
 
@@ -66,8 +69,29 @@ val json = Json {
     prettyPrint = true
 }
 
-fun compile() {
-    val file = File("src/main/resources/results/compiled.json")
+enum class ArgumentType {
+    String, Number, Location, Vector
+}
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class JMKCCFunction(
+    val name: String,
+    val description: String = "",
+    val arguments: Array<ArgumentType> = []
+)
+
+fun compile(functionClass: JMKCCFunctions? = null) {
+    if (functionClass != null) {
+        val methods = (functionClass::class.companionObject ?: throw RuntimeException("Класс с функциями не имеет компаньон-объекта."))
+            .memberFunctions.filter { it.hasAnnotation<JMKCCFunction>() }
+        for (method in methods) {
+            println((method.annotations[0] as JMKCCFunction).name)
+        }
+    }
+    val path = "src/main/resources/results/compiled.json"
+    val file = File(path)
     file.createNewFile()
     file.writeText(json.encodeToString(hashMapOf("handlers" to data)))
+    println("\u001b[92m[COMPILER] Компиляция завершена и сохранена в файл по пути `$path` \u001b[0m")
 }

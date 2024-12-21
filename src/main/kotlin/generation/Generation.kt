@@ -1,12 +1,15 @@
+package generation
+
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-val primitives = hashMapOf("String" to "JString", "Number" to "JNumber")
+val primitives = hashSetOf("text", "number")
+const val functionNameArgument = "funName"
 
 fun main() {
-    generateEventType("src/main/resources/events.json", "src/main/kotlin/EventType.kt")
-    generateFunctions("src/main/resources/actions.json", "src/main/kotlin")
+    generateEventType("src/main/resources/events.json", "src/main/kotlin/generation/EventType.kt")
+    generateFunctions("src/main/resources/actions.json", "src/main/kotlin/generation")
 }
 
 fun generateEventType(inputFilePath: String, outputFilePath: String) {
@@ -33,7 +36,6 @@ fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonArray = JSONArray(jsonContent)
 
     val functionContent = buildString {
-        appendImports()
         jsonArray.filterIsInstance<JSONObject>()
             .filter { !it.getString("name").contains("dummy", ignoreCase = true) }
             .forEach { json ->
@@ -57,14 +59,9 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
 
     appendLine("fun $functionName(${generateFunctionArguments(argsArray)}) {")
     appendLine(generateArgumentHandling(argsArray, functionName))
-    appendLine("    val funValues = mutableListOf<JsonObject>()")
-    appendLine(generateFunValues(argsArray, functionName))
-    appendLine("    val op = JsonObject(hashMapOf(")
-    appendLine("        \"action\" to JsonPrimitive(\"$action\"),")
-    appendLine("        \"values\" to JsonArray(funValues)")
-    appendLine("    ))")
-    appendLine("    currentScope.addOperationToScope(op)")
-    appendLine("}\n")
+    appendLine("\thandleFun(\"$action\", ${generateFunValues(argsArray, functionName)})")
+    appendLine("}")
+    namePlaced = false
 }
 
 private fun generateFunctionArguments(argsArray: JSONArray): String {
@@ -77,21 +74,32 @@ private fun generateFunctionArguments(argsArray: JSONArray): String {
     }
 }
 
-private fun generateArgumentHandling(argsArray: JSONArray, functionName: String): String {
+var namePlaced = false
+
+fun StringBuilder.functionName(functionName: String): String {
+    if (!namePlaced) {
+        namePlaced = true
+        appendLine("\tval $functionNameArgument = \"$functionName\"")
+    }
+    return functionNameArgument
+}
+
+private fun StringBuilder.generateArgumentHandling(argsArray: JSONArray, functionName: String): String {
     return argsArray.joinToString("") { arg ->
         val argObj = arg as JSONObject
+        val isPlural = argObj.has("array")
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
             val expectedType = if (argType in listOf("text", "number")) argType else null
 
             if (expectedType != null) {
-               """${"\t"}val ${argId}ARG =  ${expectedType}Convert("$functionName", "$argId", $argId)${"\n"}"""
-            } else if (argType != "enum") "\tval ${argId}ARG = typeCheck<${mapType(argType)}>($argId)\n" else ""
-        }
+               "\tval ${argId}ARG=${expectedType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId)\n"
+            } else if (argType != "enum") "\tval ${argId}ARG=typeCheck<${mapType(argType)}>($argId)\n" else ""
+        }.removeSuffix("\n")
 }
 
-private fun generateFunValues(argsArray: JSONArray, functionName: String): String {
-    return argsArray.joinToString("\n") { arg ->
+private fun StringBuilder.generateFunValues(argsArray: JSONArray, functionName: String): String {
+    return "listOf(" + argsArray.joinToString("") { arg ->
         val argObj = arg as JSONObject
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
@@ -99,18 +107,12 @@ private fun generateFunValues(argsArray: JSONArray, functionName: String): Strin
 
         if (argType == "enum") {
             val enumValues = argObj.getJSONArray("values")
-            """enumCheck("$functionName", "$argId", $argId, listOf(${enumValues.joinToString(", ") {"\"$it\""} }))${"\n"}"""
+            appendLine("\tenumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${enumValues.joinToString(",") {"\"$it\""} }))")
+            ""
         } else {
-            """funValues.add(JsonObject(hashMapOf("name" to JsonPrimitive("$argName"),"value" to ${argId}ARG.parse())))"""
+            "funValue(\"$argName\",${argId}ARG.parse()),"
         }
-    }
-}
-
-private fun StringBuilder.appendImports() {
-    appendLine("import kotlinx.serialization.json.JsonArray")
-    appendLine("import kotlinx.serialization.json.JsonObject")
-    appendLine("import kotlinx.serialization.json.JsonPrimitive")
-    appendLine()
+    }.removeSuffix(",\n") + ")"
 }
 
 private fun toCamelCase(input: String): String {
