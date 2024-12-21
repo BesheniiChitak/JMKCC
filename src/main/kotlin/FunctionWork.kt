@@ -43,6 +43,7 @@ fun textConvert(functionName: String, argName: String, value: Any): JString {
 
 fun textConvertPlural(functionName: String, argName: String, value: Any): List<JString> {
     return when (value) {
+        is String, is JString -> listOf(textConvert(functionName, argName, value))
         is List<*> -> value.map { textConvert(functionName, argName, it ?: "null") }
         else -> {
             errorPrint("${currentScope.scope}: В $functionName:$argName получен тип ${value::class.simpleName}, ожидалось: String или JString")
@@ -64,6 +65,7 @@ fun numberConvert(functionName: String, argName: String, value: Any): JNumber {
 
 fun numberConvertPlural(functionName: String, argName: String, value: Any): List<JNumber> {
     return when (value) {
+        is Number, is JNumber -> listOf(numberConvert(functionName, argName, value))
         is List<*> -> value.map { numberConvert(functionName, argName, it ?: 0) }
         else -> {
             errorPrint("${currentScope.scope}: В $functionName:$argName получен тип ${value::class.simpleName}, ожидалось: Number или JNumber")

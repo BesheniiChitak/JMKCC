@@ -15,11 +15,6 @@
                                         "text": "123",
                                         "type": "text",
                                         "parsing": "legacy"
-                                    },
-                                    {
-                                        "text": "321",
-                                        "type": "text",
-                                        "parsing": "legacy"
                                     }
                                 ]
                             }

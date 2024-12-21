@@ -25,7 +25,7 @@ import playerMessage
 fun main() {
 
     Event(EventType.WORLD_START) {
-        playerMessage(listOf("123", "321"))
+        playerMessage("123")
     }
 
     compile()
