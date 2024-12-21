@@ -12,7 +12,7 @@
                                 "type": "array",
                                 "values": [
                                     {
-                                        "text": "123",
+                                        "text": "привет!!!!",
                                         "type": "text",
                                         "parsing": "legacy"
                                     }
@@ -23,7 +23,7 @@
                 }
             ],
             "type": "event",
-            "event": "world_start"
+            "event": "player_join"
         }
     ]
 }

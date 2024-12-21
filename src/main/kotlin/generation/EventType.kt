@@ -1,3 +1,4 @@
+@Suppress("unused", "SpellCheckingInspection", "PackageDirectoryMismatch")
 enum class EventType(val cancellable: Boolean) {
     BELL_RING(true),
     BLOCK_BURN(true),
