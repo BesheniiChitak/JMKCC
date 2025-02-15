@@ -12,7 +12,7 @@ fun main() {
 
     Event(EventType.PLAYER_JOIN) {
 
-        for (i in 1..100) {
+        for (i in 1..10000) {
             playerMessage("hiiii")
         }
 
