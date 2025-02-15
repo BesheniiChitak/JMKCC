@@ -127,7 +127,7 @@ fun handleFun(name: String, body: List<Map<String, JsonElement>?>) {
     )
     if (currentSelector != null) {
         if (currentSelector is PlayerSelector && !name.startsWith("player")) {
-            warningPrint("$name: Только действия над игроком могут быть вызваны с селектором игрока. Селектор проигнорирован.")
+            warningPrint("$name: Только действия над игроком могут быть вызваны с селектором игрока. Селектор проигнорирован." + if (name == "set_variable_value") "\n\t\t^^^ Может быть вызвано работой плейсхолдеров (Игровых значений)" else "")
         }
         if (currentSelector is EntitySelector && !name.startsWith("entity")) {
             warningPrint("$name: Только действия над сущностью могут быть вызваны с селектором сущности. Селектор проигнорирован.")

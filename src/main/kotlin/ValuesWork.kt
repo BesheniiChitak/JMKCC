@@ -120,7 +120,7 @@ open class JMap(val value: Number): JValue, JAny() {
 
 private fun createVar(value: JAny): String {
     val name = "j.${varNumber++}"
-    //variableSetValue(Var(name, VarScope.LOCAL), value)
+    variableSetValue(Var(name, VarScope.LOCAL), value)
     return "%var_local($name)"
 }
 
@@ -148,7 +148,7 @@ open class JVariable(val name: String, val  scope: VarScope = VarScope.LOCAL): J
     }
 
     fun assign(value: JAny): JVariable {
-        //variableSetValue(this, value)
+        variableSetValue(this, value)
         return this
     }
 
