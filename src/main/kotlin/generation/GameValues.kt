@@ -1,10 +1,8 @@
 // ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ
-@file:Suppress("unused", "SpellCheckingInspection", "PackageDirectoryMismatch")
-
+@file:Suppress("unused","SpellCheckingInspection","PackageDirectoryMismatch")
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-
-enum class GameValues(val type: String): JValue, TextValue {
+enum class GameValues(val type: String) : JValue {
 	ABSORPTION_HEALTH("number"),
 	ACTION_COUNT_PER_TICK("number"),
 	AGE("number"),
@@ -30,9 +28,12 @@ enum class GameValues(val type: String): JValue, TextValue {
 	CURSOR_ITEM("item"),
 	CUSTOM_INVENTORY_ITEMS("array"),
 	DIRECTION_OF_VIEW("vector"),
+	DISPLAY_ENTITY_LEFT_ROTATION("vector"),
+	DISPLAY_ENTITY_RIGHT_ROTATION("vector"),
 	DISPLAY_ENTITY_SCALE("vector"),
 	DISPLAY_ENTITY_TRANSLATION("vector"),
 	DISPLAY_NAME("text"),
+	ENTITY_FUSE_TICKS("number"),
 	ENTITY_HEIGHT("number"),
 	ENTITY_ITEM("item"),
 	ENTITY_TICKS_LIVED("number"),
@@ -55,6 +56,7 @@ enum class GameValues(val type: String): JValue, TextValue {
 	EVENT_EXHAUSTION_REASON("text"),
 	EVENT_EXPERIENCE("number"),
 	EVENT_FAIL_MOVE_REASON("text"),
+	EVENT_FINAL_DAMAGE("number"),
 	EVENT_FISH_STATE("text"),
 	EVENT_FOOD_LEVEL("number"),
 	EVENT_FROM_LOCATION("location"),
@@ -67,6 +69,9 @@ enum class GameValues(val type: String): JValue, TextValue {
 	EVENT_INVENTORY_CLICK_TYPE("text"),
 	EVENT_ITEM("item"),
 	EVENT_ITEMS("array"),
+	EVENT_KNOCKBACK_CAUSE("text"),
+	EVENT_KNOCKBACK_EVENT_TYPE("text"),
+	EVENT_KNOCKBACK_VECTOR("vector"),
 	EVENT_MESSAGE("text"),
 	EVENT_NEW_LOCATION("location"),
 	EVENT_NEW_POTION_EFFECT("potion"),
@@ -86,6 +91,7 @@ enum class GameValues(val type: String): JValue, TextValue {
 	EVENT_TRANSFORM_REASON("text"),
 	EVENT_TRANSFORMED_ENTITIES("array"),
 	EVENT_TREE_TYPE("text"),
+	EVENT_VELOCITY("vector"),
 	EXPERIENCE_LEVEL("number"),
 	EXPERIENCE_PROGRESS("number"),
 	EYE_LOCATION("location"),
@@ -123,6 +129,7 @@ enum class GameValues(val type: String): JValue, TextValue {
 	PING("number"),
 	PITCH("number"),
 	PLAYER_COUNT("number"),
+	POSE("text"),
 	POTION_EFFECTS("array"),
 	PROJECTILE_OWNER_UUID("text"),
 	PROJECTILE_POWER("vector"),
@@ -161,7 +168,7 @@ enum class GameValues(val type: String): JValue, TextValue {
 	YAW("number"),
 	Z_COORDINATE("number");
 
-	override fun parse(): JsonObject {
+    override fun parse(): JsonObject {
 		return parse(GameValueSelector.CURRENT)
 	}
 

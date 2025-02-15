@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.io.File
 
 val primitives = hashSetOf("text", "number")
-const val functionNameArgument = "funName"
+const val functionNameArgument = "fN"
 
 fun main() {
     generateEventType("src/main/resources/events.json", "src/main/kotlin/generation/EventType.kt")
@@ -42,15 +42,31 @@ fun generateGameValues(inputFilePath: String, outputFilePath: String) {
 
     val enumContent = buildString {
         appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
-        appendLine("@file:Suppress(\"unused\", \"SpellCheckingInspection\", \"PackageDirectoryMismatch\")")
-        appendLine("enum class GameValues(val type: String) {")
+        append("""
+            @file:Suppress("unused","SpellCheckingInspection","PackageDirectoryMismatch")
+            import kotlinx.serialization.json.JsonObject
+            import kotlinx.serialization.json.JsonPrimitive${"\n"}
+        """.trimIndent())
+        appendLine("enum class GameValues(val type: String) : JValue {")
         jsonArray.filterIsInstance<JSONObject>()
             .forEachIndexed { index, json ->
                 append("\t${json.getString("id").uppercase()}(\"${json.getString("type")}\")")
-                if (index < jsonArray.length() - 1) append(",\n") else appendLine()
+                if (index < jsonArray.length() - 1) append(",\n") else appendLine(";")
             }
-        append(";")
-        appendLine("""override fun toString(): String {
+        appendLine("""
+    override fun parse(): JsonObject {
+		return parse(GameValueSelector.CURRENT)
+	}
+
+	fun parse(selector: GameValueSelector): JsonObject {
+		return JsonObject(hashMapOf(
+				"type" to JsonPrimitive("game_value"),
+				"game_value" to JsonPrimitive(name.lowercase()),
+				"selection" to JsonPrimitive("{\"type\":\"${"$"}{selector.id}\"}")
+			)
+		)
+	}
+	override fun toString(): String {
         return createVar(this)
     }""")
         appendLine("}")
@@ -91,7 +107,7 @@ fun generateFunctions(inputFilePath: String, outputDirPath: String) {
         appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
         appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
         jsonArray.filterIsInstance<JSONObject>()
-            .filter { !it.getString("name").contains("dummy", ignoreCase = true) || it.getString("name") == "variableSetValue" }
+            .filter { !it.getString("name").contains("dummy", ignoreCase = true) }
             .forEach { json ->
                 appendGeneratedFunction(json)
             }
@@ -111,9 +127,9 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
     val action = json.getString("id")
     val argsArray = json.optJSONArray("args") ?: JSONArray()
 
-    appendLine("fun $functionName(${generateFunctionArguments(argsArray)}) {")
+    append("\nfun $functionName(${generateFunctionArguments(argsArray)}){")
     append(generateArgumentHandling(argsArray, functionName))
-    append("handleFun(\"$action\", ${generateFunValues(argsArray)})}")
+    append("hF(\"$action\", ${generateFunValues(argsArray)})}")
     namePlaced = false
 }
 
@@ -133,7 +149,7 @@ var namePlaced = false
 fun StringBuilder.functionName(functionName: String): String {
     if (!namePlaced) {
         namePlaced = true
-        append("val $functionNameArgument = \"$functionName\";")
+        append("val $functionNameArgument=\"$functionName\";")
     }
     return functionNameArgument
 }
@@ -147,11 +163,11 @@ private fun StringBuilder.generateArgumentHandling(argsArray: JSONArray, functio
 
         when (argType) {
             in primitives -> {
-                "val ${argId}A=${argType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId);"
+                "val ${argId}A=${argType.first()}C${if (isPlural) "P" else ""}(${functionName(functionName)},\"$argId\",$argId);"
             }
             "enum" -> {
                 val values = argObj.getJSONArray("values")
-                "val ${argId}A=enumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${values.join(",")}));"
+                "val ${argId}A=eC(${functionName(functionName)},\"$argId\",$argId,listOf(${values.join(",")}));"
             }
             else -> ""
         }
@@ -165,7 +181,7 @@ private fun generateFunValues(argsArray: JSONArray): String {
         val argType = argObj.getString("type")
         val argName = argObj.getString("id")
 
-        "funValue(\"$argName\",${argId}${if (argType in primitives || argType == "enum") "A" else ""}),"
+        "fV(\"$argName\",${argId}${if (argType in primitives || argType == "enum") "A" else ""}),"
     }.removeSuffix("\n").removeSuffix(",") + ")"
 }
 

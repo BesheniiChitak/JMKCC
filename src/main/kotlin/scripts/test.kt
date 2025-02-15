@@ -12,13 +12,8 @@ fun main() {
 
     Event(EventType.PLAYER_JOIN) {
 
-        playerMessage(listOf(
-            "здаров браток",
-            "как дела?"
-        ))
-
-        withSelector(PlayerSelector.ALL_PLAYERS) {
-            playerMessage(listOf("${GameValues.NAME} зашёл в мир!!!!", GameValues.NAME))
+        for (i in 1..100) {
+            playerMessage("hiiii")
         }
 
     }

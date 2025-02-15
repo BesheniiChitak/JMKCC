@@ -152,5 +152,21 @@ fun funValue(name: String, value: JValue?): Map<String, JsonElement>?
 fun funValue(name: String, value: List<JValue>): Map<String, JsonElement>?
 { return mapOf("name" to JsonPrimitive(name), "value" to value.parse()) }
 
+fun fV(name: String, value: JValue?): Map<String, JsonElement>? = funValue(name, value)
+fun fV(name: String, value: List<JValue>): Map<String, JsonElement>? = funValue(name, value)
+
+fun tC(functionName: String, argName: String, value: Any): TextValue = textConvert(functionName, argName, value)
+fun tCP(functionName: String, argName: String, value: Any): List<TextValue> = textConvertPlural(functionName, argName, value)
+
+fun nC(functionName: String, argName: String, value: Any): NumberValue = numberConvert(functionName, argName, value)
+fun nCP(functionName: String, argName: String, value: Any): List<NumberValue> = numberConvertPlural(functionName, argName, value)
+
+fun eC(functionName: String?, argName: String, enum: Any?, values: List<String>): JValue? = enumCheck(functionName, argName, enum, values)
+
+inline fun <reified T : Any> tCk(value: Any): T = typeCheck(value)
+
+fun hF(name: String, body: List<Map<String, JsonElement>?>) = handleFun(name, body)
+
+
 
 
