@@ -100,6 +100,14 @@
     "type": "vector"
   },
   {
+    "id": "display_entity_left_rotation",
+    "type": "vector"
+  },
+  {
+    "id": "display_entity_right_rotation",
+    "type": "vector"
+  },
+  {
     "id": "display_entity_scale",
     "type": "vector"
   },
@@ -110,6 +118,10 @@
   {
     "id": "display_name",
     "type": "text"
+  },
+  {
+    "id": "entity_fuse_ticks",
+    "type": "number"
   },
   {
     "id": "entity_height",
@@ -200,6 +212,10 @@
     "type": "text"
   },
   {
+    "id": "event_final_damage",
+    "type": "number"
+  },
+  {
     "id": "event_fish_state",
     "type": "text"
   },
@@ -246,6 +262,18 @@
   {
     "id": "event_items",
     "type": "array"
+  },
+  {
+    "id": "event_knockback_cause",
+    "type": "text"
+  },
+  {
+    "id": "event_knockback_event_type",
+    "type": "text"
+  },
+  {
+    "id": "event_knockback_vector",
+    "type": "vector"
   },
   {
     "id": "event_message",
@@ -322,6 +350,10 @@
   {
     "id": "event_tree_type",
     "type": "text"
+  },
+  {
+    "id": "event_velocity",
+    "type": "vector"
   },
   {
     "id": "experience_level",
@@ -470,6 +502,10 @@
   {
     "id": "player_count",
     "type": "number"
+  },
+  {
+    "id": "pose",
+    "type": "text"
   },
   {
     "id": "potion_effects",

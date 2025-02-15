@@ -17,6 +17,7 @@ fun textConvert(functionName: String, argName: String, value: Any): TextValue {
         }
         is String -> JString(value)
         is JString -> value
+        is TextValue -> value
         else -> {
             errorPrint("${currentScope.scope}: В $functionName:$argName получен тип ${value::class.simpleName}, ожидалось: String или JString")
             throw Exception()
@@ -115,6 +116,10 @@ inline fun <reified T : Any> typeCheck(value: Any): T {
     return value
 }
 
+fun variableSetValue(variable:JVariable,value:JValue) {
+    handleFun("set_variable_value", listOf(funValue("variable",variable),funValue("value",value)))
+}
+
 fun handleFun(name: String, body: List<Map<String, JsonElement>?>) {
     if (currentScope.scope.isEmpty()) {
         errorPrint("$name: Действия не могут быть вызваны вне функции/процесса/события")
@@ -127,10 +132,12 @@ fun handleFun(name: String, body: List<Map<String, JsonElement>?>) {
     )
     if (currentSelector != null) {
         if (currentSelector is PlayerSelector && !name.startsWith("player")) {
-            warningPrint("$name: Только действия над игроком могут быть вызваны с селектором игрока. Селектор проигнорирован." + if (name == "set_variable_value") "\n\t\t^^^ Может быть вызвано работой плейсхолдеров (Игровых значений)" else "")
+            warningPrint("$name: Только действия над игроком могут быть вызваны с селектором игрока. Селектор проигнорирован."
+                    + if (name == "set_variable_value") "\n\t\t^^^ Может быть вызвано работой плейсхолдеров (Игровых значений)" else "")
         }
         if (currentSelector is EntitySelector && !name.startsWith("entity")) {
-            warningPrint("$name: Только действия над сущностью могут быть вызваны с селектором сущности. Селектор проигнорирован.")
+            warningPrint("$name: Только действия над сущностью могут быть вызваны с селектором сущности. Селектор проигнорирован."
+                    + if (name == "set_variable_value") "\n\t\t^^^ Может быть вызвано работой плейсхолдеров (Игровых значений)" else "")
         }
         op["selection"] = JsonObject(hashMapOf(
             "type" to JsonPrimitive((currentSelector as PlayerSelector).name.lowercase())

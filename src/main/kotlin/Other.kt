@@ -1,3 +1,6 @@
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+
 var currentSelector: Selector? = null
 
 interface Selector

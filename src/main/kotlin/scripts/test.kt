@@ -18,7 +18,7 @@ fun main() {
         ))
 
         withSelector(PlayerSelector.ALL_PLAYERS) {
-            playerMessage(listOf("${Value(GameValues.NAME)} зашёл в мир!!!!", Value(GameValues.NAME)))
+            playerMessage(listOf("${GameValues.NAME} зашёл в мир!!!!", GameValues.NAME))
         }
 
     }

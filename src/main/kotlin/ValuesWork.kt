@@ -41,16 +41,6 @@ open class JString(var value: String, var type: StringType = StringType.LEGACY):
     fun jsonValue() = JsonPrimitive(value)
 }
 
-open class MarkerOrEString(var name: String, var value: Any): JValue, TextValue, JAny() {
-    override fun parse(): JsonObject {
-        if (value is String) return JsonObject(hashMapOf(
-            "type" to JsonPrimitive("enum"),
-            "enum" to JsonPrimitive(value as String)
-        )) else if (value is JVariable) return value.parse()
-        else throw Exception("ебать, что то пошло не так в сгенерированной команде, напиши разрабу")
-    }
-}
-
 open class JNumber(var value: Number): JValue, JAny(), NumberValue {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
@@ -118,7 +108,7 @@ open class JMap(val value: Number): JValue, JAny() {
     }
 }
 
-private fun createVar(value: JAny): String {
+fun createVar(value: JValue): String {
     val name = "j.${varNumber++}"
     variableSetValue(Var(name, VarScope.LOCAL), value)
     return "%var_local($name)"
@@ -126,11 +116,13 @@ private fun createVar(value: JAny): String {
 
 open class JGameValue(var id: GameValues, var selector: GameValueSelector = GameValueSelector.CURRENT): JValue, NumberValue, TextValue, JAny() {
     override fun parse(): JsonObject {
-        return JsonObject(hashMapOf(
-            "type" to JsonPrimitive("game_value"),
-            "game_value" to JsonPrimitive(id.name.lowercase()),
-            "selection" to JsonPrimitive("{\"type\":\"${selector.id}\"}")
-        ))
+        return JsonObject(
+            hashMapOf(
+                "type" to JsonPrimitive("game_value"),
+                "game_value" to JsonPrimitive(id.name.lowercase()),
+                "selection" to JsonPrimitive("{\"type\":\"${selector.id}\"}")
+            )
+        )
     }
 }
 

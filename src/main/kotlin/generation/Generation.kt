@@ -49,6 +49,10 @@ fun generateGameValues(inputFilePath: String, outputFilePath: String) {
                 append("\t${json.getString("id").uppercase()}(\"${json.getString("type")}\")")
                 if (index < jsonArray.length() - 1) append(",\n") else appendLine()
             }
+        append(";")
+        appendLine("""override fun toString(): String {
+        return createVar(this)
+    }""")
         appendLine("}")
     }
 
@@ -79,36 +83,6 @@ private fun toPascalCase(input: String): String {
     return input.split("_").joinToString("") { it.lowercase().replaceFirstChar { it.uppercase() } }
 }
 
-val generatedEnums = hashSetOf<String>()
-
-//fun generateCodeEnums(inputFilePath: String, outputFilePath: String) {
-//    val jsonContent = File(inputFilePath).readText()
-//    val jsonArray = JSONArray(jsonContent)
-//
-//    val enumContent = buildString {
-//        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
-//        appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
-//        jsonArray.filterIsInstance<JSONObject>().forEach { json ->
-//            json.getJSONArray("args").filterIsInstance<JSONObject>().forEach { jsonObject ->
-//                if (jsonObject.has("values")) {
-//                    val name = jsonObject.getString("id")
-//                    if (name !in generatedEnums) {
-//                        generatedEnums += name
-//                        appendLine("enum class ${toPascalCase(name)}:Enum(\"$name\") {")
-//                        jsonObject.getJSONArray("values").filterIsInstance<String>().forEachIndexed { index, enum ->
-//                            append("\t${enum.uppercase()}")
-//                            if (index < jsonArray.length() - 1) append(",\n") else appendLine()
-//                        }
-//                        appendLine("}")
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    File(outputFilePath).writeText(enumContent)
-//    println("Код-энумы успешно сгенерированы!")
-//}
-
 fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonContent = File(inputFilePath).readText()
     val jsonArray = JSONArray(jsonContent)
@@ -117,7 +91,7 @@ fun generateFunctions(inputFilePath: String, outputDirPath: String) {
         appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
         appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
         jsonArray.filterIsInstance<JSONObject>()
-            .filter { !it.getString("name").contains("dummy", ignoreCase = true) }
+            .filter { !it.getString("name").contains("dummy", ignoreCase = true) || it.getString("name") == "variableSetValue" }
             .forEach { json ->
                 appendGeneratedFunction(json)
             }

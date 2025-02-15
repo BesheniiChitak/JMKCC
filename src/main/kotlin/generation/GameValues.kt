@@ -1,6 +1,10 @@
 // ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ
 @file:Suppress("unused", "SpellCheckingInspection", "PackageDirectoryMismatch")
-enum class GameValues(val type: String) {
+
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+
+enum class GameValues(val type: String): JValue, TextValue {
 	ABSORPTION_HEALTH("number"),
 	ACTION_COUNT_PER_TICK("number"),
 	AGE("number"),
@@ -155,5 +159,21 @@ enum class GameValues(val type: String) {
 	X_COORDINATE("number"),
 	Y_COORDINATE("number"),
 	YAW("number"),
-	Z_COORDINATE("number")
+	Z_COORDINATE("number");
+
+	override fun parse(): JsonObject {
+		return parse(GameValueSelector.CURRENT)
+	}
+
+	fun parse(selector: GameValueSelector): JsonObject {
+		return JsonObject(hashMapOf(
+				"type" to JsonPrimitive("game_value"),
+				"game_value" to JsonPrimitive(name.lowercase()),
+				"selection" to JsonPrimitive("{\"type\":\"${selector.id}\"}")
+			)
+		)
+	}
+	override fun toString(): String {
+        return createVar(this)
+    }
 }
