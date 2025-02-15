@@ -2,21 +2,35 @@
 
 import kotlinx.serialization.json.*
 
-interface Value {
+interface JValue {
     fun parse(): JsonObject
 }
-interface NumberValue: Value
-interface TextValue: Value
+interface NumberValue: JValue
+interface TextValue: JValue
 
-abstract class JAny: Value
+abstract class JAny: JValue {
+    override fun toString(): String {
+        return createVar(this)
+    }
+}
 
-fun List<Value>.parse(): JsonObject {
+interface Enum {
+    var name: String
+    fun parse(): JsonObject {
+        return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("enum"),
+            "enum" to JsonPrimitive(name)
+        ))
+    }
+}
+
+fun List<JValue>.parse(): JsonObject {
     return JsonObject(hashMapOf(
         "type" to JsonPrimitive("array"),
         "values" to JsonArray(this.map { it.parse() })
     ))
 }
-open class JString(var value: String, var type: StringType = StringType.LEGACY): Value, TextValue, JAny() {
+open class JString(var value: String, var type: StringType = StringType.LEGACY): JValue, TextValue, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("text"),
@@ -26,7 +40,18 @@ open class JString(var value: String, var type: StringType = StringType.LEGACY):
     }
     fun jsonValue() = JsonPrimitive(value)
 }
-open class JNumber(var value: Number): Value, JAny(), NumberValue {
+
+open class MarkerOrEString(var name: String, var value: Any): JValue, TextValue, JAny() {
+    override fun parse(): JsonObject {
+        if (value is String) return JsonObject(hashMapOf(
+            "type" to JsonPrimitive("enum"),
+            "enum" to JsonPrimitive(value as String)
+        )) else if (value is JVariable) return value.parse()
+        else throw Exception("ебать, что то пошло не так в сгенерированной команде, напиши разрабу")
+    }
+}
+
+open class JNumber(var value: Number): JValue, JAny(), NumberValue {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("number"),
@@ -35,7 +60,7 @@ open class JNumber(var value: Number): Value, JAny(), NumberValue {
     }
     fun jsonValue() = JsonPrimitive(value)
 }
-open class JVector(var x: Number = 0, var y: Number = 0, var z: Number): Value, JAny() {
+open class JVector(var x: Number = 0, var y: Number = 0, var z: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("vector"),
@@ -45,7 +70,7 @@ open class JVector(var x: Number = 0, var y: Number = 0, var z: Number): Value, 
         ))
     }
 }
-open class JLocation(var x: Number = 0, var y: Number = 0, var z: Number, var yaw: Number = 0, var pitch: Number = 0): Value, JAny() {
+open class JLocation(var x: Number = 0, var y: Number = 0, var z: Number, var yaw: Number = 0, var pitch: Number = 0): JValue, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("location"),
@@ -57,60 +82,55 @@ open class JLocation(var x: Number = 0, var y: Number = 0, var z: Number, var ya
         ))
     }
 }
-open class JSound(val value: Number): Value, JAny() {
+open class JSound(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JParticle(val value: Number): Value, JAny() {
+open class JParticle(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JBlock(val value: Number): Value, JAny() {
+open class JBlock(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JItem(val value: Material): Value, JAny() {
+open class JItem(val value: Material): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JPotion(val value: Number): Value, JAny() {
+open class JPotion(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JArray(val value: Number): Value, JAny() {
+open class JArray(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
-open class JMap(val value: Number): Value, JAny() {
+open class JMap(val value: Number): JValue, JAny() {
     override fun parse(): JsonObject {
         TODO()
     }
 }
 
-private fun createVar(value: Any): String {
-    val name = "jmkcc.${varNumber}"
-    varNumber++
-    variableSetValue(Var(name, VarScope.LOCAL), value)
+private fun createVar(value: JAny): String {
+    val name = "j.${varNumber++}"
+    //variableSetValue(Var(name, VarScope.LOCAL), value)
     return "%var_local($name)"
 }
 
-open class JGameValue(var id: GameValues, var selector: GameValueSelector = GameValueSelector.CURRENT): Value, NumberValue, TextValue, JAny() {
+open class JGameValue(var id: GameValues, var selector: GameValueSelector = GameValueSelector.CURRENT): JValue, NumberValue, TextValue, JAny() {
     override fun parse(): JsonObject {
         return JsonObject(hashMapOf(
             "type" to JsonPrimitive("game_value"),
             "game_value" to JsonPrimitive(id.name.lowercase()),
             "selection" to JsonPrimitive("{\"type\":\"${selector.id}\"}")
         ))
-    }
-
-    override fun toString(): String {
-        return createVar(this)
     }
 }
 
@@ -125,6 +145,15 @@ open class JVariable(val name: String, val  scope: VarScope = VarScope.LOCAL): J
             "variable" to JsonPrimitive(name),
             "scope" to JsonPrimitive(scope.name.lowercase())
         ))
+    }
+
+    fun assign(value: JAny): JVariable {
+        //variableSetValue(this, value)
+        return this
+    }
+
+    override fun toString(): String {
+        return "%var${if (scope != VarScope.GAME) "_${scope.name.lowercase()}" else ""}($name)"
     }
 }
 

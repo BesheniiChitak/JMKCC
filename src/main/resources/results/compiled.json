@@ -30,30 +30,6 @@
                     "selection": {
                         "type": "all_players"
                     },
-                    "action": "set_variable_value",
-                    "values": [
-                        {
-                            "name": "variable",
-                            "value": {
-                                "variable": "jmkcc.0",
-                                "type": "variable",
-                                "scope": "local"
-                            }
-                        },
-                        {
-                            "name": "value",
-                            "value": {
-                                "type": "game_value",
-                                "selection": "{\"type\":\"current\"}",
-                                "game_value": "name"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "selection": {
-                        "type": "all_players"
-                    },
                     "action": "player_send_message",
                     "values": [
                         {
@@ -62,7 +38,7 @@
                                 "type": "array",
                                 "values": [
                                     {
-                                        "text": "%var_local(jmkcc.0) зашёл в мир!!!!",
+                                        "text": "%var_local(j.0) зашёл в мир!!!!",
                                         "type": "text",
                                         "parsing": "legacy"
                                     }

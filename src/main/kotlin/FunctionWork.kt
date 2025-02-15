@@ -90,11 +90,15 @@ fun numberConvertPlural(functionName: String, argName: String, value: Any): List
 }
 
 
-fun enumCheck(functionName: String?, argName: String, enum: Any?, values: List<String>) {
-    if (enum != null && enum !in values) {
-        errorPrint("${currentScope.scope}: В энуме $functionName:$argName получено значение $enum, ожидалось одно из: ${values.joinToString(", ") }}")
-        throw Exception()
+fun enumCheck(functionName: String?, argName: String, enum: Any?, values: List<String>) : JValue? {
+    if (enum != null) {
+        if (enum is JVariable) return enum
+        val filtered = values.filter { it.lowercase().startsWith(enum as? String ?: if (enum is JString) enum.value else throw errorPrint2("я не знаю что ты пихнул в энум но пожалуйста так не делай ^_^ ($enum ; ${enum::class})")) }
+        if (filtered.size != 1)
+            throw errorPrint2("${currentScope.scope}: В энуме $functionName:$argName получено значение $enum, ожидалось одно из: ${values.joinToString(", ") }}")
+        else return JString(filtered.first())
     }
+    return null
 }
 
 inline fun <reified T : Any> typeCheck(value: Any): T {
@@ -111,14 +115,15 @@ inline fun <reified T : Any> typeCheck(value: Any): T {
     return value
 }
 
-fun handleFun(name: String, body: List<Map<String, JsonElement>>) {
+fun handleFun(name: String, body: List<Map<String, JsonElement>?>) {
     if (currentScope.scope.isEmpty()) {
         errorPrint("$name: Действия не могут быть вызваны вне функции/процесса/события")
         throw RuntimeException()
     }
+    val opList = JsonArray(body.mapNotNull { it?.let { JsonObject(it) } })
     val op = hashMapOf(
         "action" to JsonPrimitive(name),
-        "values" to JsonArray(body.map { JsonObject(it) })
+        "values" to opList
     )
     if (currentSelector != null) {
         if (currentSelector is PlayerSelector && !name.startsWith("player")) {
@@ -134,7 +139,11 @@ fun handleFun(name: String, body: List<Map<String, JsonElement>>) {
     currentScope.addOperationToScope(JsonObject(op))
 }
 
-fun funValue(name: String, value: JsonElement): Map<String, JsonElement> = mapOf("name" to JsonPrimitive(name), "value" to value)
+fun funValue(name: String, value: JValue?): Map<String, JsonElement>?
+    { return mapOf("name" to JsonPrimitive(name), "value" to (value ?: return null).parse()) }
+
+fun funValue(name: String, value: List<JValue>): Map<String, JsonElement>?
+{ return mapOf("name" to JsonPrimitive(name), "value" to value.parse()) }
 
 
 

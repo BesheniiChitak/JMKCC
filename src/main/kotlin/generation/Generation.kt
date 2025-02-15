@@ -11,6 +11,7 @@ fun main() {
     generateEventType("src/main/resources/events.json", "src/main/kotlin/generation/EventType.kt")
     generateMaterial("src/main/resources/items.json", "src/main/kotlin/generation/Material.kt")
     generateGameValues("src/main/resources/values.json", "src/main/kotlin/generation/GameValues.kt")
+    //generateCodeEnums("src/main/resources/actions.json", "src/main/kotlin/generation/Enums.kt")
     generateFunctions("src/main/resources/actions.json", "src/main/kotlin/generation")
 }
 
@@ -74,6 +75,40 @@ fun generateMaterial(inputFilePath: String, outputFilePath: String) {
     println("Типы предметов успешно сгенерированы!")
 }
 
+private fun toPascalCase(input: String): String {
+    return input.split("_").joinToString("") { it.lowercase().replaceFirstChar { it.uppercase() } }
+}
+
+val generatedEnums = hashSetOf<String>()
+
+//fun generateCodeEnums(inputFilePath: String, outputFilePath: String) {
+//    val jsonContent = File(inputFilePath).readText()
+//    val jsonArray = JSONArray(jsonContent)
+//
+//    val enumContent = buildString {
+//        appendLine("// ЭТОТ ФАЙЛ ГЕНЕРИРУЕТСЯ АВТОМАТИЧЕСКИ И НЕ ПРЕДНАЗНАЧЕН ДЛЯ ИЗМЕНЕНИЯ")
+//        appendLine("@file:Suppress(\"SpellCheckingInspection\", \"PackageDirectoryMismatch\", \"unused\")")
+//        jsonArray.filterIsInstance<JSONObject>().forEach { json ->
+//            json.getJSONArray("args").filterIsInstance<JSONObject>().forEach { jsonObject ->
+//                if (jsonObject.has("values")) {
+//                    val name = jsonObject.getString("id")
+//                    if (name !in generatedEnums) {
+//                        generatedEnums += name
+//                        appendLine("enum class ${toPascalCase(name)}:Enum(\"$name\") {")
+//                        jsonObject.getJSONArray("values").filterIsInstance<String>().forEachIndexed { index, enum ->
+//                            append("\t${enum.uppercase()}")
+//                            if (index < jsonArray.length() - 1) append(",\n") else appendLine()
+//                        }
+//                        appendLine("}")
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    File(outputFilePath).writeText(enumContent)
+//    println("Код-энумы успешно сгенерированы!")
+//}
+
 fun generateFunctions(inputFilePath: String, outputDirPath: String) {
     val jsonContent = File(inputFilePath).readText()
     val jsonArray = JSONArray(jsonContent)
@@ -104,18 +139,18 @@ private fun StringBuilder.appendGeneratedFunction(json: JSONObject) {
 
     appendLine("fun $functionName(${generateFunctionArguments(argsArray)}) {")
     append(generateArgumentHandling(argsArray, functionName))
-    appendLine("handleFun(\"$action\", ${generateFunValues(argsArray, functionName)})")
-    appendLine("}")
+    append("handleFun(\"$action\", ${generateFunValues(argsArray)})}")
     namePlaced = false
 }
 
 private fun generateFunctionArguments(argsArray: JSONArray): String {
     return argsArray.joinToString(",") { arg ->
         val argObj = arg as JSONObject
-        val argType = mapType(argObj.getString("type"))
-        val camelCaseId = toCamelCase(argObj.getString("id"))
-        if (argType == "JString?") "$camelCaseId: Any? = null"
-        else "$camelCaseId: Any"
+        val argType = argObj.getString("type")
+        val id = argObj.getString("id")
+        val camelCase = toCamelCase(id)
+        if (argType == "enum") "$camelCase:Any?=null"
+        else "$camelCase:${if (argType in primitives) "Any" else mapType(argType)}"
     }
 }
 
@@ -124,7 +159,7 @@ var namePlaced = false
 fun StringBuilder.functionName(functionName: String): String {
     if (!namePlaced) {
         namePlaced = true
-        appendLine("val $functionNameArgument = \"$functionName\"")
+        append("val $functionNameArgument = \"$functionName\";")
     }
     return functionNameArgument
 }
@@ -135,28 +170,28 @@ private fun StringBuilder.generateArgumentHandling(argsArray: JSONArray, functio
         val isPlural = argObj.has("array")
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
-            val expectedType = if (argType in listOf("text", "number")) argType else null
 
-            if (expectedType != null) {
-               "val ${argId}ARG=${expectedType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId)\n"
-            } else if (argType != "enum") "val ${argId}ARG=typeCheck<${mapType(argType)}>($argId)\n" else ""
+        when (argType) {
+            in primitives -> {
+                "val ${argId}A=${argType}Convert${if (isPlural) "Plural" else ""}(${functionName(functionName)},\"$argId\",$argId);"
+            }
+            "enum" -> {
+                val values = argObj.getJSONArray("values")
+                "val ${argId}A=enumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${values.join(",")}));"
+            }
+            else -> ""
         }
+    }
 }
 
-private fun StringBuilder.generateFunValues(argsArray: JSONArray, functionName: String): String {
+private fun generateFunValues(argsArray: JSONArray): String {
     return "listOf(" + argsArray.joinToString("") { arg ->
         val argObj = arg as JSONObject
         val argId = toCamelCase(argObj.getString("id"))
         val argType = argObj.getString("type")
         val argName = argObj.getString("id")
 
-        if (argType == "enum") {
-            val enumValues = argObj.getJSONArray("values")
-            appendLine("enumCheck(${functionName(functionName)},\"$argId\",$argId,listOf(${enumValues.joinToString(",") {"\"$it\""} }))")
-            ""
-        } else {
-            "funValue(\"$argName\",${argId}ARG.parse()),"
-        }
+        "funValue(\"$argName\",${argId}${if (argType in primitives || argType == "enum") "A" else ""}),"
     }.removeSuffix("\n").removeSuffix(",") + ")"
 }
 
@@ -168,7 +203,7 @@ private fun toCamelCase(input: String): String {
 private fun mapType(type: String): String {
     return when (type) {
         "text" -> "JString"
-        "enum" -> "JString?"
+        "enum" -> "String?"
         "number" -> "JNumber"
         "location" -> "JLocation"
         "vector" -> "JVector"

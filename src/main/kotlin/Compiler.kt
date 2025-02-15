@@ -9,12 +9,12 @@ val data = mutableListOf<HashMap<String, JsonElement>>()
 
 var varNumber = 0
 
-var currentScope = Scope()
+var currentScope = CodeScope()
 var lastPosition = 0
 
 val vars = hashMapOf<String, JVariable>()
 
-class Scope(
+class CodeScope(
     val scope: MutableList<Any> = mutableListOf()
 ) {
     fun addOperationToScope(operation: JsonObject) {
@@ -80,6 +80,9 @@ annotation class JMKCCFunction(
     val arguments: Array<ArgumentType> = []
 )
 
+fun Any.parse(): JsonObject {
+    TODO()
+}
 fun compile(fileName: String, functionClass: JMKCCFunctions? = null) {
     if (functionClass != null) {
         val methods = (functionClass::class.companionObject ?: throw RuntimeException("Класс с функциями не имеет компаньон-объекта."))
